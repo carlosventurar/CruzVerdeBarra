@@ -6,6 +6,12 @@ import './Search.css';
 // URL del webhook de n8n
 const N8N_WEBHOOK_URL = 'https://primary-production-7f25.up.railway.app/webhook/cruz-verde-search';
 
+// Clave para localStorage
+const STORAGE_KEY = 'cruzVerde_chatHistory';
+
+// Máximo de mensajes a guardar (para no sobrecargar)
+const MAX_HISTORY_MESSAGES = 20;
+
 const SearchInput = () => {
     const [query, setQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +21,34 @@ const SearchInput = () => {
     const [aiResponse, setAiResponse] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const debounceRef = useRef(null);
+
+    // Estado para historial de conversación
+    const [conversationHistory, setConversationHistory] = useState([]);
+
+    // Cargar historial de localStorage al montar
+    useEffect(() => {
+        try {
+            const savedHistory = localStorage.getItem(STORAGE_KEY);
+            if (savedHistory) {
+                const parsed = JSON.parse(savedHistory);
+                setConversationHistory(parsed);
+            }
+        } catch (error) {
+            console.error('Error cargando historial:', error);
+        }
+    }, []);
+
+    // Guardar historial en localStorage cuando cambie
+    const saveHistory = (history) => {
+        try {
+            // Limitar cantidad de mensajes guardados
+            const trimmedHistory = history.slice(-MAX_HISTORY_MESSAGES);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmedHistory));
+            setConversationHistory(trimmedHistory);
+        } catch (error) {
+            console.error('Error guardando historial:', error);
+        }
+    };
 
     // Cerrar al hacer click fuera
     useEffect(() => {
@@ -27,7 +61,7 @@ const SearchInput = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Función para llamar al webhook de n8n
+    // Función para llamar al webhook de n8n con historial
     const fetchAIResponse = async (searchQuery) => {
         try {
             const response = await fetch(N8N_WEBHOOK_URL, {
@@ -35,7 +69,10 @@ const SearchInput = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ query: searchQuery }),
+                body: JSON.stringify({
+                    query: searchQuery,
+                    history: conversationHistory
+                }),
             });
 
             if (!response.ok) {
@@ -43,7 +80,17 @@ const SearchInput = () => {
             }
 
             const data = await response.json();
-            return data.response || 'No se pudo obtener una respuesta.';
+            const aiText = data.response || 'No se pudo obtener una respuesta.';
+
+            // Guardar en historial: mensaje del usuario y respuesta de IA
+            const newHistory = [
+                ...conversationHistory,
+                { role: 'user', content: searchQuery },
+                { role: 'assistant', content: aiText }
+            ];
+            saveHistory(newHistory);
+
+            return aiText;
         } catch (error) {
             console.error('Error llamando al asistente:', error);
             return 'Lo sentimos, hubo un error al procesar su consulta. Intente nuevamente.';
