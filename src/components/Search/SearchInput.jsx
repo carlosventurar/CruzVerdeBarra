@@ -1,18 +1,19 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import SearchOverlay from './SearchOverlay';
-import ChatWidget from '../Dialogflow/ChatWidget';
 import './Search.css';
+
+// URL del webhook de n8n
+const N8N_WEBHOOK_URL = 'https://primary-production-7f25.up.railway.app/webhook/cruz-verde-search';
 
 const SearchInput = () => {
     const [query, setQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
 
-    // Estados para la integración con IA
+    // Estados para la IA
     const [aiResponse, setAiResponse] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [queryToSend, setQueryToSend] = useState(null);
     const debounceRef = useRef(null);
 
     // Cerrar al hacer click fuera
@@ -25,6 +26,29 @@ const SearchInput = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Función para llamar al webhook de n8n
+    const fetchAIResponse = async (searchQuery) => {
+        try {
+            const response = await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: searchQuery }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la respuesta');
+            }
+
+            const data = await response.json();
+            return data.response || 'No se pudo obtener una respuesta.';
+        } catch (error) {
+            console.error('Error llamando al asistente:', error);
+            return 'Lo sentimos, hubo un error al procesar su consulta. Intente nuevamente.';
+        }
+    };
 
     const handleFocus = () => {
         if (query.length > 0) setIsOpen(true);
@@ -44,29 +68,36 @@ const SearchInput = () => {
         if (value.length < 3) {
             setAiResponse(null);
             setIsLoading(false);
-            setQueryToSend(null);
             return;
         }
 
-        // Debounce de 300ms antes de enviar a Dialogflow
+        // Debounce de 800ms antes de llamar a n8n
         setIsLoading(true);
-        debounceRef.current = setTimeout(() => {
-            setQueryToSend(value);
-        }, 300);
+        debounceRef.current = setTimeout(async () => {
+            const response = await fetchAIResponse(value);
+            setAiResponse(response);
+            setIsLoading(false);
+        }, 800);
     };
 
-    // Callback cuando Dialogflow responde
-    const handleAIResponse = useCallback((response) => {
-        setAiResponse(response);
-        setIsLoading(false);
-    }, []);
+    const handleKeyDown = async (e) => {
+        if (e.key === 'Enter' && query.length >= 3) {
+            // Enviar inmediatamente al presionar Enter
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+            setIsLoading(true);
+            const response = await fetchAIResponse(query);
+            setAiResponse(response);
+            setIsLoading(false);
+        }
+    };
 
     const clearSearch = () => {
         setQuery('');
         setIsOpen(false);
         setAiResponse(null);
         setIsLoading(false);
-        setQueryToSend(null);
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
@@ -91,16 +122,7 @@ const SearchInput = () => {
                     value={query}
                     onChange={handleChange}
                     onFocus={handleFocus}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && query.length >= 3) {
-                            // Enviar inmediatamente al presionar Enter
-                            if (debounceRef.current) {
-                                clearTimeout(debounceRef.current);
-                            }
-                            setIsLoading(true);
-                            setQueryToSend(query);
-                        }
-                    }}
+                    onKeyDown={handleKeyDown}
                 />
                 {query && (
                     <X size={18} className="search-close-icon" onClick={clearSearch} />
@@ -114,13 +136,6 @@ const SearchInput = () => {
                     isLoading={isLoading}
                 />
             )}
-
-            {/* ChatWidget oculto - solo para comunicación con Dialogflow */}
-            <ChatWidget
-                autoSendQuery={queryToSend}
-                onResponse={handleAIResponse}
-                showWidget={false}
-            />
         </div>
     );
 };
