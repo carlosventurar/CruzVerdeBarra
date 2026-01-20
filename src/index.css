@@ -1,0 +1,26 @@
+:root {
+  --primary-green: #009640;
+  --secondary-green: #40b06b;
+  --text-dark: #333333;
+  --text-light: #ffffff;
+  --bg-light: #f4f4f4;
+  --border-color: #e0e0e0;
+  
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: flex-start;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+}
+
+* {
+  box-sizing: border-box;
+}

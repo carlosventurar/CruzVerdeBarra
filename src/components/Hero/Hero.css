@@ -1,0 +1,143 @@
+/* Hero.css */
+.hero-container {
+    width: 100%;
+    position: relative;
+    background-color: white;
+    margin-bottom: 20px;
+}
+
+.hero-banner-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    min-height: 200px;
+    /* Placeholder height */
+    background: linear-gradient(90deg, #6fd6ff 0%, #a29bfe 100%);
+    /* Placeholder gradient */
+    position: relative;
+}
+
+/* Recreating the banner content via CSS to match screenshot as much as possible without image assets */
+.permission-banner {
+    background: #eef1f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    max-width: 1200px;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.banner-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.banner-text-content h2 {
+    color: #3b3bbd;
+    margin: 0;
+    font-size: 1.8rem;
+    line-height: 1.1;
+}
+
+.banner-btn {
+    background: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.insc-input {
+    border: none;
+    font-size: 1.2rem;
+    color: #666;
+    outline: none;
+    width: 150px;
+}
+
+.cursor-hand {
+    width: 20px;
+    height: 20px;
+    background: black;
+    /* simplistic cursor */
+    clip-path: polygon(0 0, 0% 100%, 30% 60%, 80% 60%);
+    position: absolute;
+    transform: translate(250px, 10px);
+}
+
+/* Circles 35% 50% 50% */
+.discounts-circles {
+    display: flex;
+    gap: 10px;
+}
+
+.circle-badge {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #3b3bbd;
+    border: 3px solid white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.circle-green {
+    background: #5ed57f;
+    color: white;
+}
+
+.circle-purple {
+    background: #9b72cf;
+    color: white;
+}
+
+.circle-blue {
+    background: #5da0e5;
+    color: white;
+}
+
+.percent {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.label {
+    font-size: 0.6rem;
+}
+
+/* Orange stripe/tape */
+.orange-tape {
+    background-color: #fce8cc;
+    height: 30px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    overflow: hidden;
+}
+
+.tape-icon {
+    color: #e67e22;
+    font-size: 1.2rem;
+    padding: 0 10px;
+}

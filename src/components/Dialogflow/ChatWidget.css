@@ -1,0 +1,71 @@
+/* ChatWidget.css */
+/* Boton personalizado FACM */
+.facm-chat-btn {
+    /* Fixed positioning removed for embedded use */
+    /* position: fixed; bottom: 20px; right: 20px; */
+    position: relative;
+    width: 64px;
+    height: 64px;
+    background: #ffffff;
+    border: 3px solid #4a1860;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(74, 24, 96, 0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 8px;
+    display: none;
+    /* Hidden by default as we want it integrated deeper? Or maybe shown inside overlay */
+}
+
+.facm-chat-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(74, 24, 96, 0.4);
+    border-color: #6b2d7b;
+}
+
+.facm-chat-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Estilos del Widget Dialogflow Embedded */
+df-messenger {
+    /* Override fixed positioning */
+    position: relative !important;
+    bottom: auto !important;
+    right: auto !important;
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+
+    --df-messenger-chat-bubble-background: #4a1860;
+    --df-messenger-chat-bubble-icon-color: #ffffff;
+    --df-messenger-titlebar-background: #4a1860;
+    --df-messenger-titlebar-font-color: #ffffff;
+    --df-messenger-titlebar-icon-color: #ffffff;
+    --df-messenger-titlebar-icon: #ffffff;
+    --df-messenger-minimize-icon-color: #ffffff;
+    --df-messenger-close-icon-color: #ffffff;
+    --df-messenger-titlebar-icon-font-color: #ffffff;
+    --df-messenger-message-user-background: #4a1860;
+    --df-messenger-message-user-font-color: #ffffff;
+    --df-messenger-message-bot-background: #f3e8f7;
+    --df-messenger-send-icon-color: #4a1860;
+    --df-messenger-chat-window-height: 500px;
+    --df-messenger-chat-window-width: 400px;
+}
+
+/* Ocultar boton original */
+df-messenger df-messenger-chat-bubble button {
+    opacity: 0 !important;
+}
+
+/* Ocultar boton personalizado cuando chat esta abierto */
+.chat-open .facm-chat-btn {
+    display: none !important;
+}

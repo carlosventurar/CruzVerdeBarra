@@ -1,0 +1,249 @@
+/* Search.css */
+.search-wrapper {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    max-width: 600px;
+    z-index: 1000;
+    /* Ensure it stays on top */
+}
+
+.search-input-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 40px 10px 20px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 2px rgba(0, 150, 64, 0.2);
+    border-color: var(--primary-green);
+}
+
+.search-close-icon {
+    position: absolute;
+    right: 15px;
+    color: #999;
+    cursor: pointer;
+}
+
+/* Overlay Styles */
+.search-overlay {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 0 0 15px 15px;
+    /* Only round bottom corners if attached, usually independent though */
+    margin-top: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Make it look detached as per screenshot (floating bubble) */
+.search-overlay.detached {
+    border-radius: 15px;
+}
+
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.search-link {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.search-content {
+    display: flex;
+    gap: 20px;
+}
+
+.search-sidebar {
+    width: 30%;
+    border-right: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.search-section-title {
+    color: var(--primary-green);
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.search-item {
+    color: #444;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+.search-item:hover {
+    text-decoration: underline;
+}
+
+.search-results-main {
+    flex: 1;
+}
+
+/* Product Card in Search */
+.search-product-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.search-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.product-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.product-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-brand {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.product-title {
+    font-weight: 600;
+    color: #333;
+    margin: 2px 0;
+    font-size: 0.95rem;
+}
+
+.product-prices {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+}
+
+.price-normal {
+    font-size: 0.8rem;
+    color: #999;
+    text-decoration: line-through;
+}
+
+.price-offer {
+    color: #e67e22;
+    /* Orange offer color */
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* AI Overview - Estilo inspirado en Google */
+.ai-overview-section {
+    background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);
+    border: 1px solid #c8e6d0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.ai-overview-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #2d7a4a;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.ai-overview-header svg {
+    flex-shrink: 0;
+}
+
+.ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.ai-content {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.ai-summary {
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.ai-hint {
+    color: #888;
+    font-style: italic;
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* Ocultar widget de chat cuando showWidget=false */
+.chat-widget-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.chat-widget-hidden df-messenger {
+    display: none !important;
+}
