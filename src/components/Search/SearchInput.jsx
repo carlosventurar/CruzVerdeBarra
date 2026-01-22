@@ -6,10 +6,13 @@ import './Search.css';
 // URL del webhook de n8n
 const N8N_WEBHOOK_URL = 'https://primary-production-7f25.up.railway.app/webhook/cruz-verde-search';
 
-// Clave para localStorage
-const STORAGE_KEY = 'cruzVerde_chatHistory';
+// Clave para localStorage - Session ID para Dialogflow CX
+const SESSION_KEY = 'cruzVerde_sessionId';
 
-// Máximo de mensajes a guardar (para no sobrecargar)
+// Clave para historial visual (solo para mostrar en UI)
+const HISTORY_KEY = 'cruzVerde_chatHistory';
+
+// Máximo de mensajes a guardar para visualización
 const MAX_HISTORY_MESSAGES = 20;
 
 const SearchInput = () => {
@@ -22,13 +25,27 @@ const SearchInput = () => {
     const [isLoading, setIsLoading] = useState(false);
     const debounceRef = useRef(null);
 
-    // Estado para historial de conversación
+    // Session ID para Dialogflow CX (memoria nativa por sesión)
+    const [sessionId, setSessionId] = useState('');
+
+    // Estado para historial visual (solo para mostrar en UI)
     const [conversationHistory, setConversationHistory] = useState([]);
 
-    // Cargar historial de localStorage al montar
+    // Cargar o generar sessionId al montar
+    useEffect(() => {
+        let id = localStorage.getItem(SESSION_KEY);
+        if (!id) {
+            // Generar ID único para la sesión
+            id = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem(SESSION_KEY, id);
+        }
+        setSessionId(id);
+    }, []);
+
+    // Cargar historial visual de localStorage al montar
     useEffect(() => {
         try {
-            const savedHistory = localStorage.getItem(STORAGE_KEY);
+            const savedHistory = localStorage.getItem(HISTORY_KEY);
             if (savedHistory) {
                 const parsed = JSON.parse(savedHistory);
                 setConversationHistory(parsed);
@@ -38,12 +55,12 @@ const SearchInput = () => {
         }
     }, []);
 
-    // Guardar historial en localStorage cuando cambie
+    // Guardar historial visual en localStorage
     const saveHistory = (history) => {
         try {
             // Limitar cantidad de mensajes guardados
             const trimmedHistory = history.slice(-MAX_HISTORY_MESSAGES);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmedHistory));
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmedHistory));
             setConversationHistory(trimmedHistory);
         } catch (error) {
             console.error('Error guardando historial:', error);
@@ -61,38 +78,19 @@ const SearchInput = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Construir query con contexto de historial
-    const buildQueryWithHistory = (userQuery) => {
-        if (conversationHistory.length === 0) {
-            return userQuery;
-        }
-
-        // Tomar últimos 10 mensajes del historial
-        const recentHistory = conversationHistory.slice(-10);
-        let context = '[Historial de conversación anterior]\n';
-
-        for (const msg of recentHistory) {
-            const prefix = msg.role === 'user' ? 'Usuario' : 'Asistente';
-            context += `${prefix}: ${msg.content}\n`;
-        }
-
-        context += `[Fin del historial]\n\nNueva pregunta del usuario: ${userQuery}`;
-        return context;
-    };
-
-    // Función para llamar al webhook de n8n con historial
+    // Función para llamar al webhook de n8n (Dialogflow CX maneja memoria por sesión)
     const fetchAIResponse = async (searchQuery) => {
         try {
-            // Construir query con contexto de historial
-            const queryWithContext = buildQueryWithHistory(searchQuery);
-
+            // Dialogflow CX maneja el contexto automáticamente por sessionId
+            // Ya no necesitamos enviar historial, solo query + sessionId
             const response = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    query: queryWithContext
+                    query: searchQuery,
+                    sessionId: sessionId
                 }),
             });
 
@@ -103,7 +101,7 @@ const SearchInput = () => {
             const data = await response.json();
             const aiText = data.response || 'No se pudo obtener una respuesta.';
 
-            // Guardar en historial: mensaje del usuario y respuesta de IA
+            // Guardar en historial visual local
             const newHistory = [
                 ...conversationHistory,
                 { role: 'user', content: searchQuery },
