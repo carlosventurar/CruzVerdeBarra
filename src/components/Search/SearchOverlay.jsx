@@ -1,9 +1,31 @@
 import React from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, ExternalLink } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import './Search.css';
+
+// Función para limpiar y formatear la respuesta de IA
+const formatAIResponse = (response) => {
+    if (!response) return '';
+
+    let formatted = response;
+
+    // Convertir bullets inline (• producto) a líneas separadas
+    formatted = formatted.replace(/\s*•\s*/g, '\n\n• ');
+
+    // Limpiar "🔗 Ver producto:" y dejar solo el link
+    formatted = formatted.replace(/🔗\s*Ver producto:\s*/gi, '\n  → ');
+
+    // Limpiar dobles saltos de línea excesivos
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+
+    return formatted.trim();
+};
 
 const SearchOverlay = ({ query, aiResponse, isLoading }) => {
     if (!query) return null;
+
+    const formattedResponse = formatAIResponse(aiResponse);
 
     return (
         <div className="search-overlay detached">
@@ -22,8 +44,39 @@ const SearchOverlay = ({ query, aiResponse, isLoading }) => {
                 )}
 
                 {aiResponse && !isLoading && (
-                    <div className="ai-content">
-                        <p className="ai-summary">{aiResponse}</p>
+                    <div className="ai-content ai-summary">
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                // Mostrar URLs como "Ver producto →" en lugar del link completo
+                                a: ({ href, children }) => {
+                                    // Si el children es una URL, mostrar texto corto
+                                    const isUrl = typeof children === 'string' &&
+                                                  (children.startsWith('http') || children.includes('storage.cloud'));
+
+                                    return (
+                                        <a
+                                            href={href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="product-link"
+                                        >
+                                            {isUrl ? (
+                                                <>
+                                                    Ver producto <ExternalLink size={12} />
+                                                </>
+                                            ) : children}
+                                        </a>
+                                    );
+                                },
+                                // Mejorar estilo de emphasis (nombres de producto)
+                                em: ({ children }) => (
+                                    <strong className="product-name">{children}</strong>
+                                )
+                            }}
+                        >
+                            {formattedResponse}
+                        </ReactMarkdown>
                     </div>
                 )}
 
@@ -54,7 +107,6 @@ const SearchOverlay = ({ query, aiResponse, isLoading }) => {
                 </div>
 
                 <div className="search-results-main">
-                    {/* Mock Product Result */}
                     <div className="search-product-card">
                         <div style={{ width: '60px', height: '60px', background: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <span style={{ fontSize: '24px' }}>🧴</span>
