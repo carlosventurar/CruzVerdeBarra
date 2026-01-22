@@ -6,7 +6,10 @@ import './Search.css';
 // URL del webhook de n8n
 const N8N_WEBHOOK_URL = 'https://primary-production-7f25.up.railway.app/webhook/cruz-verde-search';
 
-// Clave para localStorage
+// Clave para sessionId de Dialogflow CX
+const SESSION_KEY = 'cruzVerde_sessionId';
+
+// Clave para localStorage (historial visual)
 const STORAGE_KEY = 'cruzVerde_chatHistory';
 
 // Máximo de mensajes a guardar (para no sobrecargar)
@@ -24,6 +27,19 @@ const SearchInput = () => {
 
     // Estado para historial de conversación
     const [conversationHistory, setConversationHistory] = useState([]);
+
+    // SessionId para Dialogflow CX (memoria nativa)
+    const [sessionId, setSessionId] = useState('');
+
+    // Cargar o generar sessionId al montar
+    useEffect(() => {
+        let id = localStorage.getItem(SESSION_KEY);
+        if (!id) {
+            id = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem(SESSION_KEY, id);
+        }
+        setSessionId(id);
+    }, []);
 
     // Cargar historial de localStorage al montar
     useEffect(() => {
@@ -61,38 +77,17 @@ const SearchInput = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Construir query con contexto de historial
-    const buildQueryWithHistory = (userQuery) => {
-        if (conversationHistory.length === 0) {
-            return userQuery;
-        }
-
-        // Tomar últimos 10 mensajes del historial
-        const recentHistory = conversationHistory.slice(-10);
-        let context = '[Historial de conversación anterior]\n';
-
-        for (const msg of recentHistory) {
-            const prefix = msg.role === 'user' ? 'Usuario' : 'Asistente';
-            context += `${prefix}: ${msg.content}\n`;
-        }
-
-        context += `[Fin del historial]\n\nNueva pregunta del usuario: ${userQuery}`;
-        return context;
-    };
-
-    // Función para llamar al webhook de n8n con historial
+    // Función para llamar al webhook de n8n (Dialogflow CX maneja memoria por sesión)
     const fetchAIResponse = async (searchQuery) => {
         try {
-            // Construir query con contexto de historial
-            const queryWithContext = buildQueryWithHistory(searchQuery);
-
             const response = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    query: queryWithContext
+                    query: searchQuery,
+                    sessionId: sessionId
                 }),
             });
 
